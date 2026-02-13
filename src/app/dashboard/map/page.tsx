@@ -64,7 +64,7 @@ export default function MapPage() {
               "flex items-center gap-2 px-3 py-1.5 border transition-all",
               showBusinesses
                 ? "bg-white/10 border-white/20 text-white"
-                : "bg-white/[0.02] border-white/5 text-white/30"
+                : "bg-white/[0.02] border-white/5 text-white/30",
             )}
           >
             {showBusinesses ? (
@@ -81,7 +81,7 @@ export default function MapPage() {
               "flex items-center gap-2 px-3 py-1.5 border transition-all",
               showAgents
                 ? "bg-white/10 border-white/20 text-white"
-                : "bg-white/[0.02] border-white/5 text-white/30"
+                : "bg-white/[0.02] border-white/5 text-white/30",
             )}
           >
             {showAgents ? (

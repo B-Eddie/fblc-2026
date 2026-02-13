@@ -102,7 +102,8 @@ export default function LeafletMap({
       const circle = L.circleMarker([m.lat, m.lng], {
         radius: m.radius ?? (m.type === "business" ? 12 : 6),
         color: m.color ?? (m.type === "business" ? "#ffffff" : "#888888"),
-        fillColor: m.fillColor ?? (m.type === "business" ? "#ffffff" : "#888888"),
+        fillColor:
+          m.fillColor ?? (m.type === "business" ? "#ffffff" : "#888888"),
         fillOpacity: m.fillOpacity ?? (m.type === "business" ? 0.3 : 0.5),
         weight: m.weight ?? (m.type === "business" ? 2 : 1),
       });
@@ -137,11 +138,7 @@ export default function LeafletMap({
   }
 
   return (
-    <div
-      ref={mapRef}
-      className={className}
-      style={{ height, width: "100%" }}
-    />
+    <div ref={mapRef} className={className} style={{ height, width: "100%" }} />
   );
 }
 
