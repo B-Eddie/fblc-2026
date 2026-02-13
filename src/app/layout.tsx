@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Marketify — AI Market Simulation",
+  title: "Pilot — AI Market Simulation",
   description:
     "Simulate how customer personas react to your business decisions with AI-powered market intelligence.",
 };

@@ -13,7 +13,7 @@ export default function DataStream() {
       color: string;
       speed: number;
     }[] = [];
-    const colors = ["#00f0ff", "#a855f7", "#ec4899", "#10b981"];
+    const colors = ["#ffffff", "#e0e0e0", "#c0c0c0", "#a0a0a0"];
 
     for (let i = 0; i < 8; i++) {
       const points: THREE.Vector3[] = [];

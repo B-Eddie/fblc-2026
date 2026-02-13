@@ -12,10 +12,10 @@ export default function ParticleField({ count = 2000 }: { count?: number }) {
     const col = new Float32Array(count * 3);
 
     const neonColors = [
-      [0, 0.94, 1], // cyan
-      [0.66, 0.33, 0.97], // purple
-      [0.93, 0.29, 0.6], // pink
-      [0.06, 0.73, 0.51], // green
+      [1, 1, 1], // white
+      [0.8, 0.8, 0.8], // light grey
+      [0.6, 0.6, 0.6], // medium grey
+      [0.4, 0.4, 0.4], // dark grey
     ];
 
     for (let i = 0; i < count; i++) {

@@ -20,11 +20,11 @@ export default function HeroScene() {
           dpr={[1, 2]}
         >
           <ambientLight intensity={0.1} />
-          <pointLight position={[10, 10, 10]} color="#00f0ff" intensity={0.5} />
+          <pointLight position={[10, 10, 10]} color="#ffffff" intensity={1.0} />
           <pointLight
             position={[-10, -10, -5]}
-            color="#a855f7"
-            intensity={0.3}
+            color="#e0e0e0"
+            intensity={0.5}
           />
 
           <ParticleField />

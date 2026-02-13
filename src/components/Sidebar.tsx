@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  BarChart3,
   LayoutDashboard,
   Store,
   Users,
@@ -30,7 +29,7 @@ export default function Sidebar() {
   return (
     <aside
       className={cn(
-        "fixed top-0 left-0 h-screen border-r border-white/10 bg-black flex flex-col transition-all duration-300 z-40 font-mono",
+        "h-screen border-r border-white/10 bg-black flex flex-col transition-all duration-300 z-40 font-mono shrink-0",
         collapsed ? "w-16" : "w-64",
       )}
     >
@@ -40,7 +39,7 @@ export default function Sidebar() {
           <BarChart3 className="w-5 h-5 text-white shrink-0" />
           {!collapsed && (
             <span className="text-sm text-white font-mono whitespace-nowrap">
-              Marketify
+              Pilot
             </span>
           )}
         </Link>

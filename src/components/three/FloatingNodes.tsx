@@ -12,9 +12,9 @@ interface NodeData {
 }
 
 const businesses: NodeData[] = [
-  { name: "The Craft Kitchen", color: "#00f0ff", offset: 0 },
-  { name: "Byte & Brew", color: "#a855f7", offset: (Math.PI * 2) / 3 },
-  { name: "Green Groove", color: "#10b981", offset: (Math.PI * 4) / 3 },
+  { name: "The Craft Kitchen", color: "#ffffff", offset: 0 },
+  { name: "Byte & Brew", color: "#e5e5e5", offset: (Math.PI * 2) / 3 },
+  { name: "Green Groove", color: "#d4d4d4", offset: (Math.PI * 4) / 3 },
 ];
 
 function FloatingNode({ name, color, offset }: NodeData) {
@@ -95,7 +95,7 @@ function ConnectionLines() {
     <group ref={lineRef}>
       <Line
         points={positions}
-        color="#00f0ff"
+        color="#ffffff"
         lineWidth={0.5}
         transparent
         opacity={0.15}
@@ -113,7 +113,7 @@ export default function FloatingNodes() {
       <ConnectionLines />
       <pointLight
         position={[0, 0, 0]}
-        color="#00f0ff"
+        color="#ffffff"
         intensity={2}
         distance={15}
       />
