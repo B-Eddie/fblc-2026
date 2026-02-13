@@ -38,6 +38,11 @@ export default function RootLayout({
           crossOrigin=""
           defer
         />
+        <script
+          src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"
+          crossOrigin=""
+          defer
+        />
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-black text-foreground`}

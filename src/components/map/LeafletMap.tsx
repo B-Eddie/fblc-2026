@@ -6,8 +6,25 @@ import { sentimentToColor } from "@/lib/utils";
 // Types for leaflet from CDN (on window.L)
 declare global {
   interface Window {
-    L: typeof import("leaflet");
+    L: typeof import("leaflet") & {
+      heatLayer?: (
+        latlngs: [number, number, number][],
+        options?: Record<string, unknown>,
+      ) => L.Layer;
+    };
   }
+}
+
+export interface HeatmapLayer {
+  id: string;
+  label: string;
+  points: [number, number, number][]; // [lat, lng, intensity]
+  gradient?: Record<number, string>;
+  radius?: number;
+  blur?: number;
+  maxZoom?: number;
+  max?: number;
+  minOpacity?: number;
 }
 
 export interface MapMarker {
@@ -27,6 +44,7 @@ interface LeafletMapProps {
   center: [number, number];
   zoom: number;
   markers: MapMarker[];
+  heatmapLayers?: HeatmapLayer[];
   height?: string;
   className?: string;
   onMarkerClick?: (id: string) => void;
@@ -36,6 +54,7 @@ export default function LeafletMap({
   center,
   zoom,
   markers,
+  heatmapLayers = [],
   height = "100%",
   className = "",
   onMarkerClick,
@@ -43,6 +62,7 @@ export default function LeafletMap({
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
   const markersLayerRef = useRef<L.LayerGroup | null>(null);
+  const heatLayersRef = useRef<L.Layer[]>([]);
   const [ready, setReady] = useState(false);
 
   // Wait for Leaflet CDN to load
@@ -89,6 +109,33 @@ export default function LeafletMap({
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ready]);
+
+  // Update heatmap layers
+  useEffect(() => {
+    if (!ready || !mapInstanceRef.current) return;
+    const L = window.L;
+    const map = mapInstanceRef.current;
+
+    // Remove existing heat layers
+    heatLayersRef.current.forEach((hl) => map.removeLayer(hl));
+    heatLayersRef.current = [];
+
+    if (!L.heatLayer) return;
+
+    heatmapLayers.forEach((layer) => {
+      if (layer.points.length === 0) return;
+      const heat = L.heatLayer(layer.points, {
+        radius: layer.radius ?? 30,
+        blur: layer.blur ?? 20,
+        maxZoom: layer.maxZoom ?? 17,
+        max: layer.max ?? 1.0,
+        minOpacity: layer.minOpacity ?? 0.3,
+        gradient: layer.gradient ?? { 0.4: "blue", 0.6: "cyan", 0.8: "lime", 1: "red" },
+      });
+      heat.addTo(map);
+      heatLayersRef.current.push(heat);
+    });
+  }, [ready, heatmapLayers]);
 
   // Update markers
   useEffect(() => {
