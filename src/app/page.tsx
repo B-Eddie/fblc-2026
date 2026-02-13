@@ -1,10 +1,10 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import Image from "next/image";
 import Link from "next/link";
 import {
   ArrowUpRight,
+  BarChart3,
   Users,
   Zap,
   Globe,
@@ -74,14 +74,7 @@ export default function Home() {
       {/* Navigation */}
       <nav className="fixed top-0 z-50 flex items-center py-6 px-8 w-full bg-black/80 backdrop-blur-sm border-b border-white/5">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 relative shrink-0">
-            <Image
-              src="/pilot-logo.png"
-              alt="Pilot Logo"
-              fill
-              className="object-contain"
-            />
-          </div>
+          <BarChart3 className="w-6 h-6 text-white" />
           <span className="text-xl text-white font-bold tracking-tighter">Pilot</span>
         </div>
         <div className="ml-auto">
@@ -227,14 +220,7 @@ export default function Home() {
       <footer className="border-t border-white/10 py-12 bg-black">
         <div className="max-w-7xl mx-auto px-8 flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="flex items-center gap-2">
-            <div className="w-6 h-6 relative shrink-0">
-              <Image
-                src="/pilot-logo.png"
-                alt="Pilot Logo"
-                fill
-                className="object-contain"
-              />
-            </div>
+            <BarChart3 className="w-5 h-5 text-white" />
             <span className="text-lg text-white font-bold tracking-tight">Pilot</span>
           </div>
           <span className="text-sm text-white/40">
