@@ -75,7 +75,9 @@ export default function Home() {
       <nav className="fixed top-0 z-50 flex items-center py-6 px-8 w-full bg-black/80 backdrop-blur-sm border-b border-white/5">
         <div className="flex items-center gap-2">
           <BarChart3 className="w-6 h-6 text-white" />
-          <span className="text-xl text-white font-bold tracking-tighter">Pilot</span>
+          <span className="text-xl text-white font-bold tracking-tighter">
+            Pilot
+          </span>
         </div>
         <div className="ml-auto">
           <Link
@@ -93,7 +95,7 @@ export default function Home() {
         <div className="absolute inset-0 z-0 opacity-80">
           <HeroScene />
         </div>
-        
+
         <div
           className="absolute inset-0 z-5 pointer-events-none"
           style={{
@@ -102,13 +104,13 @@ export default function Home() {
           }}
         />
 
-        <motion.div 
+        <motion.div
           className="relative z-10 w-full max-w-5xl flex flex-col items-center px-8 text-center"
           variants={containerVariants}
           initial="hidden"
           animate="visible"
         >
-          <motion.div 
+          <motion.div
             variants={itemVariants}
             className="inline-block px-3 py-1 bg-white/10 border border-white/20 mb-8 rounded-full backdrop-blur-md"
           >
@@ -117,15 +119,16 @@ export default function Home() {
             </span>
           </motion.div>
 
-          <motion.h1 
+          <motion.h1
             variants={itemVariants}
             className="text-6xl md:text-8xl font-bold text-white mb-8 tracking-tighter leading-[0.9]"
           >
-            Simulate your market<br />
+            Simulate your market
+            <br />
             <span className="text-white/40">before you commit.</span>
           </motion.h1>
-          
-          <motion.p 
+
+          <motion.p
             variants={itemVariants}
             className="text-lg text-white/60 max-w-2xl mb-12 font-light leading-relaxed"
           >
@@ -149,7 +152,7 @@ export default function Home() {
       {/* Features */}
       <section className="relative z-10 flex flex-col items-center py-32 px-8 bg-black">
         <div className="max-w-7xl mx-auto">
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -160,8 +163,8 @@ export default function Home() {
               De-risk every decision
             </h2>
             <p className="text-white/50 max-w-2xl mx-auto text-lg">
-              From customer modeling to revenue projections, Pilot gives you
-              the full picture before you make a move.
+              From customer modeling to revenue projections, Pilot gives you the
+              full picture before you make a move.
             </p>
           </motion.div>
 
@@ -221,10 +224,13 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-8 flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="flex items-center gap-2">
             <BarChart3 className="w-5 h-5 text-white" />
-            <span className="text-lg text-white font-bold tracking-tight">Pilot</span>
+            <span className="text-lg text-white font-bold tracking-tight">
+              Pilot
+            </span>
           </div>
           <span className="text-sm text-white/40">
-            AI agents for simulated market research &copy; {new Date().getFullYear()}
+            AI agents for simulated market research &copy;{" "}
+            {new Date().getFullYear()}
           </span>
         </div>
       </footer>
