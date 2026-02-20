@@ -1,33 +1,52 @@
 "use client";
 
+import { useMemo, useState } from "react";
 import dynamic from "next/dynamic";
-import { Users, MapPin, Building } from "lucide-react";
+import { Users, MapPin, Building, Eye, EyeOff } from "lucide-react";
 import { mockAgents } from "@/data/mock-agents";
 import { mockBusinesses } from "@/data/mock-businesses";
-import { sentimentToColor, formatCurrency } from "@/lib/utils";
+import { cn } from "@/lib/utils";
+import {
+  buildBusinessMarker,
+  buildAgentMarker,
+} from "@/components/map/LeafletMap";
 
-const MapContainer = dynamic(
-  () => import("react-leaflet").then((mod) => mod.MapContainer),
-  { ssr: false },
-);
-const TileLayer = dynamic(
-  () => import("react-leaflet").then((mod) => mod.TileLayer),
-  { ssr: false },
-);
-const CircleMarker = dynamic(
-  () => import("react-leaflet").then((mod) => mod.CircleMarker),
-  { ssr: false },
-);
-const Popup = dynamic(() => import("react-leaflet").then((mod) => mod.Popup), {
+// Dynamic import to prevent SSR issues with window.L reference
+const LeafletMap = dynamic(() => import("@/components/map/LeafletMap"), {
   ssr: false,
+  loading: () => (
+    <div className="flex items-center justify-center bg-black border border-white/10 h-full">
+      <div className="text-center">
+        <div className="w-6 h-6 border border-white/20 border-t-white animate-spin mx-auto mb-3" />
+        <p className="text-xs text-white/30 font-mono">Loading map...</p>
+      </div>
+    </div>
+  ),
 });
 
 export default function MapPage() {
   const center: [number, number] = [30.2672, -97.7431];
+  const [showBusinesses, setShowBusinesses] = useState(true);
+  const [showAgents, setShowAgents] = useState(true);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+
+  const markers = useMemo(() => {
+    const result = [];
+    if (showBusinesses) {
+      result.push(...mockBusinesses.map(buildBusinessMarker));
+    }
+    if (showAgents) {
+      result.push(...mockAgents.map(buildAgentMarker));
+    }
+    return result;
+  }, [showBusinesses, showAgents]);
+
+  const selectedAgent = mockAgents.find((a) => a.id === selectedId);
+  const selectedBiz = mockBusinesses.find((b) => b.id === selectedId);
 
   return (
-    <div className="p-8">
-      <div className="mb-8">
+    <div className="p-8 h-full flex flex-col">
+      <div className="mb-6">
         <h1 className="text-2xl font-mono font-bold text-white mb-1">
           Market Map
         </h1>
@@ -36,87 +55,79 @@ export default function MapPage() {
         </p>
       </div>
 
-      {/* Legend */}
-      <div className="flex items-center gap-6 mb-4 text-xs font-mono">
-        <div className="flex items-center gap-2">
-          <div className="w-3 h-3 bg-white" />
-          <span className="text-white/50">Businesses</span>
+      {/* Controls */}
+      <div className="flex items-center gap-4 mb-4">
+        <div className="flex items-center gap-3 text-xs font-mono">
+          <button
+            onClick={() => setShowBusinesses((v) => !v)}
+            className={cn(
+              "flex items-center gap-2 px-3 py-1.5 border transition-all",
+              showBusinesses
+                ? "bg-white/10 border-white/20 text-white"
+                : "bg-white/[0.02] border-white/5 text-white/30",
+            )}
+          >
+            {showBusinesses ? (
+              <Eye className="w-3 h-3" />
+            ) : (
+              <EyeOff className="w-3 h-3" />
+            )}
+            <div className="w-2.5 h-2.5 bg-white border border-white/30" />
+            Businesses ({mockBusinesses.length})
+          </button>
+          <button
+            onClick={() => setShowAgents((v) => !v)}
+            className={cn(
+              "flex items-center gap-2 px-3 py-1.5 border transition-all",
+              showAgents
+                ? "bg-white/10 border-white/20 text-white"
+                : "bg-white/[0.02] border-white/5 text-white/30",
+            )}
+          >
+            {showAgents ? (
+              <Eye className="w-3 h-3" />
+            ) : (
+              <EyeOff className="w-3 h-3" />
+            )}
+            <div className="w-2.5 h-2.5 bg-cyan-400/60 border border-cyan-400/30" />
+            Agents ({mockAgents.length})
+          </button>
         </div>
-        <div className="flex items-center gap-2">
-          <div className="w-3 h-3 bg-white/40" />
-          <span className="text-white/50">Agents (by sentiment)</span>
+
+        <div className="flex-1" />
+
+        <div className="flex items-center gap-4 text-xs text-white/40 font-mono">
+          <div className="flex items-center gap-1.5">
+            <div className="w-2 h-2 bg-green-400" />
+            Positive
+          </div>
+          <div className="flex items-center gap-1.5">
+            <div className="w-2 h-2 bg-cyan-400" />
+            Neutral+
+          </div>
+          <div className="flex items-center gap-1.5">
+            <div className="w-2 h-2 bg-amber-400" />
+            Neutral-
+          </div>
+          <div className="flex items-center gap-1.5">
+            <div className="w-2 h-2 bg-red-400" />
+            Negative
+          </div>
         </div>
       </div>
 
+      {/* Map */}
       <div
-        className="border border-white/10 overflow-hidden"
-        style={{ height: "calc(100vh - 240px)" }}
+        className="border border-white/10 overflow-hidden flex-1 min-h-0"
+        style={{ height: "calc(100vh - 320px)" }}
       >
-        <MapContainer
+        <LeafletMap
           center={center}
           zoom={13}
-          style={{ height: "100%", width: "100%" }}
-          scrollWheelZoom={true}
-        >
-          <TileLayer
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          />
-
-          {/* Business markers */}
-          {mockBusinesses.map((biz) => (
-            <CircleMarker
-              key={biz.id}
-              center={[biz.location.lat, biz.location.lng]}
-              radius={12}
-              pathOptions={{
-                color: "#ffffff",
-                fillColor: "#ffffff",
-                fillOpacity: 0.3,
-                weight: 2,
-              }}
-            >
-              <Popup>
-                <div className="text-xs font-mono">
-                  <div className="font-bold text-sm mb-1">{biz.name}</div>
-                  <div className="text-white/60">
-                    {biz.type} &middot; {biz.priceRange}
-                  </div>
-                  <div className="text-white/60 mt-1">{biz.address}</div>
-                  <div className="text-green-400 mt-1">
-                    {formatCurrency(biz.monthlyRevenue)}/mo
-                  </div>
-                </div>
-              </Popup>
-            </CircleMarker>
-          ))}
-
-          {/* Agent markers */}
-          {mockAgents.map((agent) => (
-            <CircleMarker
-              key={agent.id}
-              center={[agent.location.lat, agent.location.lng]}
-              radius={6}
-              pathOptions={{
-                color: sentimentToColor(agent.currentSentiment),
-                fillColor: sentimentToColor(agent.currentSentiment),
-                fillOpacity: 0.5,
-                weight: 1,
-              }}
-            >
-              <Popup>
-                <div className="text-xs font-mono">
-                  <div className="font-bold">{agent.name}</div>
-                  <div className="text-white/60">{agent.personaLabel}</div>
-                  <div className="text-white/60">{agent.neighborhood}</div>
-                  <div className="mt-1">
-                    Sentiment: {(agent.currentSentiment * 100).toFixed(0)}%
-                  </div>
-                </div>
-              </Popup>
-            </CircleMarker>
-          ))}
-        </MapContainer>
+          markers={markers}
+          height="100%"
+          onMarkerClick={(id) => setSelectedId(id === selectedId ? null : id)}
+        />
       </div>
 
       {/* Stats */}
