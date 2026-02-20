@@ -3,13 +3,6 @@
 import { useEffect, useRef, useState } from "react";
 import { sentimentToColor } from "@/lib/utils";
 
-// Types for leaflet from CDN (on window.L)
-declare global {
-  interface Window {
-    L: typeof import("leaflet");
-  }
-}
-
 export interface MapMarker {
   id: string;
   lat: number;
@@ -32,6 +25,8 @@ interface LeafletMapProps {
   onMarkerClick?: (id: string) => void;
 }
 
+type LeafletLib = typeof import("leaflet");
+
 export default function LeafletMap({
   center,
   zoom,
@@ -41,87 +36,118 @@ export default function LeafletMap({
   onMarkerClick,
 }: LeafletMapProps) {
   const mapRef = useRef<HTMLDivElement>(null);
-  const mapInstanceRef = useRef<L.Map | null>(null);
-  const markersLayerRef = useRef<L.LayerGroup | null>(null);
+  const mapInstanceRef = useRef<any>(null);
+  const markersLayerRef = useRef<any>(null);
   const [ready, setReady] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   // Wait for Leaflet CDN to load
   useEffect(() => {
-    const check = () => {
-      if (window.L) {
-        setReady(true);
-      } else {
-        setTimeout(check, 100);
+    const checkLeaflet = async () => {
+      let attempts = 0;
+      while (attempts < 50) {
+        if (typeof window !== "undefined" && (window as any).L) {
+          setReady(true);
+          return;
+        }
+        await new Promise((resolve) => setTimeout(resolve, 100));
+        attempts++;
       }
+      setError("Failed to load Leaflet library");
     };
-    check();
+    checkLeaflet();
   }, []);
 
   // Initialize map
   useEffect(() => {
     if (!ready || !mapRef.current || mapInstanceRef.current) return;
 
-    const L = window.L;
+    try {
+      const L = (window as any).L;
 
-    const map = L.map(mapRef.current, {
-      center,
-      zoom,
-      scrollWheelZoom: true,
-      zoomControl: true,
-    });
+      if (!L) {
+        setError("Leaflet not available");
+        return;
+      }
 
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      attribution:
-        '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-      maxZoom: 19,
-    }).addTo(map);
+      const map = L.map(mapRef.current).setView(center, zoom);
 
-    markersLayerRef.current = L.layerGroup().addTo(map);
-    mapInstanceRef.current = map;
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution:
+          '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+        maxZoom: 19,
+      }).addTo(map);
 
-    // Fix map size after container renders
-    setTimeout(() => map.invalidateSize(), 200);
+      markersLayerRef.current = L.layerGroup().addTo(map);
+      mapInstanceRef.current = map;
 
-    return () => {
-      map.remove();
-      mapInstanceRef.current = null;
-      markersLayerRef.current = null;
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ready]);
+      // Fix map size after container renders
+      setTimeout(() => {
+        map.invalidateSize();
+      }, 100);
+
+      return () => {
+        if (mapInstanceRef.current) {
+          mapInstanceRef.current.remove();
+          mapInstanceRef.current = null;
+          markersLayerRef.current = null;
+        }
+      };
+    } catch (err) {
+      console.error("Map initialization error:", err);
+      setError(String(err));
+    }
+  }, [ready, center, zoom]);
 
   // Update markers
   useEffect(() => {
-    if (!ready || !markersLayerRef.current) return;
+    if (!ready || !mapInstanceRef.current || !markersLayerRef.current) return;
 
-    const L = window.L;
-    const layer = markersLayerRef.current;
-    layer.clearLayers();
+    try {
+      const L = (window as any).L;
+      const layer = markersLayerRef.current;
+      layer.clearLayers();
 
-    markers.forEach((m) => {
-      const circle = L.circleMarker([m.lat, m.lng], {
-        radius: m.radius ?? (m.type === "business" ? 12 : 6),
-        color: m.color ?? (m.type === "business" ? "#ffffff" : "#888888"),
-        fillColor:
-          m.fillColor ?? (m.type === "business" ? "#ffffff" : "#888888"),
-        fillOpacity: m.fillOpacity ?? (m.type === "business" ? 0.3 : 0.5),
-        weight: m.weight ?? (m.type === "business" ? 2 : 1),
-      });
-
-      if (m.popupContent) {
-        circle.bindPopup(m.popupContent, {
-          className: "leaflet-dark-popup",
-          closeButton: true,
+      markers.forEach((m) => {
+        const circle = L.circleMarker([m.lat, m.lng], {
+          radius: m.radius ?? (m.type === "business" ? 12 : 6),
+          color: m.color ?? (m.type === "business" ? "#ffffff" : "#888888"),
+          fillColor:
+            m.fillColor ?? (m.type === "business" ? "#ffffff" : "#888888"),
+          fillOpacity: m.fillOpacity ?? (m.type === "business" ? 0.3 : 0.5),
+          weight: m.weight ?? (m.type === "business" ? 2 : 1),
         });
-      }
 
-      if (onMarkerClick) {
-        circle.on("click", () => onMarkerClick(m.id));
-      }
+        if (m.popupContent) {
+          circle.bindPopup(m.popupContent, {
+            className: "leaflet-dark-popup",
+            closeButton: true,
+          });
+        }
 
-      circle.addTo(layer);
-    });
+        if (onMarkerClick) {
+          circle.on("click", () => onMarkerClick(m.id));
+        }
+
+        circle.addTo(layer);
+      });
+    } catch (err) {
+      console.error("Marker update error:", err);
+    }
   }, [ready, markers, onMarkerClick]);
+
+  if (error) {
+    return (
+      <div
+        className={`flex items-center justify-center bg-black border border-red-500/30 ${className}`}
+        style={{ height }}
+      >
+        <div className="text-center">
+          <p className="text-xs text-red-400 font-mono">{error}</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!ready) {
     return (
@@ -138,7 +164,16 @@ export default function LeafletMap({
   }
 
   return (
-    <div ref={mapRef} className={className} style={{ height, width: "100%" }} />
+    <div
+      ref={mapRef}
+      className={`leaflet-container ${className}`}
+      style={{
+        height,
+        width: "100%",
+        backgroundColor: "#000000",
+        position: "relative",
+      }}
+    />
   );
 }
 
